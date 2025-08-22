@@ -28,7 +28,7 @@ const handler = NextAuth({
           
           if (!existingUser) {
             // Marcar que é um novo usuário no token (não criar no banco ainda)
-            return { isNewUser: true };
+            return true; // Retorna true para permitir o login
           }
           
           return true;
@@ -70,9 +70,16 @@ const handler = NextAuth({
         token.userDatas = user.userDatas;
       }
       
-      // Se é um novo usuário, marcar no token
-      if (account?.provider === 'google' && user?.isNewUser) {
-        token.isNewUser = true;
+      // Verificar se é um novo usuário baseado na existência no banco
+      if (account?.provider === 'google' && user?.email) {
+        try {
+          await dbConnect();
+          const existingUser = await User.findOne({ userEmail: user.email });
+          token.isNewUser = !existingUser;
+        } catch (error) {
+          console.error('Erro ao verificar usuário no JWT:', error);
+          token.isNewUser = false;
+        }
       }
       
       return token;
