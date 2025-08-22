@@ -8,7 +8,7 @@ declare module "next-auth" {
       email?: string | null
       image?: string | null
       userName?: string
-      userPhone?: string
+      userPhone?: string | null
       userDatas?: Date[]
       isNewUser?: boolean
     }
@@ -16,7 +16,7 @@ declare module "next-auth" {
 
   interface User {
     userName?: string
-    userPhone?: string
+    userPhone?: string | null
     userDatas?: Date[]
     isNewUser?: boolean
   }
@@ -25,7 +25,7 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     userName?: string
-    userPhone?: string
+    userPhone?: string | null
     userDatas?: Date[]
     isNewUser?: boolean
   }

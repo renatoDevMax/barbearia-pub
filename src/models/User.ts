@@ -12,7 +12,7 @@ const UserSchema = new mongoose.Schema({
   },
     userPhone: {
     type: String,
-    required: [true, 'Telefone é obrigatório'],
+    required: false,
   },
   userDatas: {
     type: [Date],
