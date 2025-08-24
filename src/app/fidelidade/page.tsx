@@ -5,12 +5,15 @@ import { useSession } from 'next-auth/react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Image from 'next/image';
+import QRCode from 'qrcode';
 
 export default function FidelidadePage() {
   const { data: session, status } = useSession();
   const [loading, setLoading] = useState(true);
   const [pontos, setPontos] = useState(0);
   const [cortesConfirmados, setCortesConfirmados] = useState([]);
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState('');
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -47,6 +50,35 @@ export default function FidelidadePage() {
 
     buscarCortesConfirmados();
   }, [session, status]);
+
+  const handleAdicionarCorte = async () => {
+    if (!session?.user) return;
+    
+    try {
+      // Criar objeto para o QR Code
+      const qrData = {
+        nome: session.user.userName || session.user.name,
+        telefone: session.user.userPhone,
+        status: "confirmado",
+        userId: session.user.id
+      };
+      
+      // Gerar QR Code
+      const qrCodeUrl = await QRCode.toDataURL(JSON.stringify(qrData), {
+        width: 300,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      });
+      
+      setQrCodeDataUrl(qrCodeUrl);
+      setShowQRModal(true);
+    } catch (error) {
+      console.error('Erro ao gerar QR Code:', error);
+    }
+  };
 
   if (status === 'loading' || loading) {
     return (
@@ -146,7 +178,10 @@ export default function FidelidadePage() {
             
           {/* Botões */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
+            <button 
+              onClick={handleAdicionarCorte}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+            >
               Adicionar Corte
             </button>
             <button 
@@ -164,6 +199,46 @@ export default function FidelidadePage() {
       </main>
 
       <Footer />
+
+      {/* Modal QR Code */}
+      {showQRModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6">
+            <div className="text-center">
+              <h3 className="text-xl font-bold text-gray-800 mb-4">
+                Exiba isso para seu Barbeiro
+              </h3>
+              
+              <div className="mb-4">
+                <p className="text-gray-600 mb-2">
+                  <strong>Nome:</strong> {session?.user?.userName || session?.user?.name}
+                </p>
+              </div>
+              
+              <div className="mb-6 flex justify-center">
+                {qrCodeDataUrl && (
+                  <img 
+                    src={qrCodeDataUrl} 
+                    alt="QR Code" 
+                    className="w-64 h-64 border-2 border-gray-300 rounded-lg"
+                  />
+                )}
+              </div>
+              
+              <div className="text-sm text-gray-500 mb-4">
+                <p>Escaneie este QR Code para adicionar um corte</p>
+              </div>
+              
+              <button
+                onClick={() => setShowQRModal(false)}
+                className="w-full bg-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-400 transition-colors"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
