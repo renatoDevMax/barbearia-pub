@@ -300,9 +300,9 @@ export default function FidelidadePage() {
               <div className="max-h-80 overflow-y-auto border border-gray-200 rounded-lg p-4">
                 {session?.user?.userDatas && session.user.userDatas.length > 0 ? (
                   <div className="space-y-2">
-                    {session.user.userDatas
-                      .sort((a: string, b: string) => new Date(b).getTime() - new Date(a).getTime()) // Ordenar do mais recente para o mais antigo
-                      .map((data: string, index: number) => (
+                                         {session.user.userDatas
+                       .sort((a: any, b: any) => new Date(b).getTime() - new Date(a).getTime()) // Ordenar do mais recente para o mais antigo
+                       .map((data: any, index: number) => (
                         <div key={index} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
                           <p className="text-gray-800 font-medium">
                             {new Date(data).toLocaleDateString('pt-BR', {
