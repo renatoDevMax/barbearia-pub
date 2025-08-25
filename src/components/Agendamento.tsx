@@ -18,8 +18,29 @@ export default function Agendamento() {
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [selectedBarber, setSelectedBarber] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [agendamentosAtivos, setAgendamentosAtivos] = useState<any[]>([]);
 
   const { data: session } = useSession();
+
+  // Carregar agendamentos ativos ao montar o componente
+  useEffect(() => {
+    const carregarAgendamentosAtivos = async () => {
+      try {
+        const response = await fetch('/api/agendamentos-ativos');
+        if (response.ok) {
+          const data = await response.json();
+          setAgendamentosAtivos(data.data || []);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar agendamentos ativos:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    carregarAgendamentosAtivos();
+  }, []);
 
   // Função para obter a data mínima (hoje)
   const getMinDate = () => {
@@ -99,6 +120,15 @@ export default function Agendamento() {
     setShowConfirmation(true);
   };
 
+  // Função para verificar se um horário está ocupado
+  const isHorarioOcupado = (data: Date, horario: string) => {
+    const dataFormatada = data.toISOString().split('T')[0];
+    return agendamentosAtivos.some(agendamento => {
+      const agendamentoData = new Date(agendamento.data).toISOString().split('T')[0];
+      return agendamentoData === dataFormatada && agendamento.horario === horario;
+    });
+  };
+
   const handleConfirmarAgendamento = async () => {
     if (!selectedDate || !selectedTime || !selectedBarber) {
       alert('Dados incompletos para agendamento');
@@ -142,6 +172,18 @@ export default function Agendamento() {
   };
 
 
+
+  // Loading inicial
+  if (loading) {
+    return (
+      <section className="bg-black text-white min-h-[calc(100dvh-4rem)] flex items-center justify-center py-16 relative overflow-hidden">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-300 text-lg">Carregando horários disponíveis...</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="bg-black text-white min-h-[calc(100dvh-4rem)] flex items-center justify-center py-16 relative overflow-hidden">
@@ -234,19 +276,25 @@ export default function Agendamento() {
                                    {/* Lista de Horários */}
                   <div className="h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
                     <div className="space-y-2 pr-2">
-                      {timeSlots.map((time, index) => (
-                        <button
-                          key={time}
-                          onClick={() => handleTimeSelect(time)}
-                          className={`w-full p-4 rounded-lg text-lg font-medium transition-all duration-300 ${
-                            selectedTime === time
-                              ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg'
-                              : 'bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white'
-                          }`}
-                        >
-                          {time}
-                        </button>
-                      ))}
+                      {timeSlots.map((time, index) => {
+                        const horarioOcupado = selectedDate ? isHorarioOcupado(selectedDate, time) : false;
+                        return (
+                          <button
+                            key={time}
+                            onClick={() => !horarioOcupado && handleTimeSelect(time)}
+                            disabled={horarioOcupado}
+                            className={`w-full p-4 rounded-lg text-lg font-medium transition-all duration-300 ${
+                              horarioOcupado
+                                ? 'bg-red-900 text-red-300 cursor-not-allowed opacity-60'
+                                : selectedTime === time
+                                ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg'
+                                : 'bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white'
+                            }`}
+                          >
+                            {time} {horarioOcupado && '(Ocupado)'}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                </div>

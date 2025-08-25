@@ -14,6 +14,7 @@ export default function FidelidadePage() {
   const [cortesConfirmados, setCortesConfirmados] = useState([]);
   const [showQRModal, setShowQRModal] = useState(false);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState('');
+  const [showHistoricoModal, setShowHistoricoModal] = useState(false);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -78,6 +79,39 @@ export default function FidelidadePage() {
     } catch (error) {
       console.error('Erro ao gerar QR Code:', error);
     }
+  };
+
+  const handleResgatarCorte = async () => {
+    if (!session?.user) return;
+    
+    try {
+      // Criar objeto para o QR Code (mesmo do adicionar corte)
+      const qrData = {
+        nome: session.user.userName || session.user.name,
+        telefone: session.user.userPhone,
+        status: "confirmado",
+        userId: session.user.id
+      };
+      
+      // Gerar QR Code
+      const qrCodeUrl = await QRCode.toDataURL(JSON.stringify(qrData), {
+        width: 300,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      });
+      
+      setQrCodeDataUrl(qrCodeUrl);
+      setShowQRModal(true);
+    } catch (error) {
+      console.error('Erro ao gerar QR Code:', error);
+    }
+  };
+
+  const handleHistoricoCortes = () => {
+    setShowHistoricoModal(true);
   };
 
   if (status === 'loading' || loading) {
@@ -185,6 +219,7 @@ export default function FidelidadePage() {
               Adicionar Corte
             </button>
             <button 
+              onClick={handleResgatarCorte}
               className={`px-6 py-3 rounded-lg font-medium transition-colors ${
                 pontos >= 10 
                   ? 'bg-green-600 text-white hover:bg-green-700' 
@@ -193,6 +228,12 @@ export default function FidelidadePage() {
               disabled={pontos < 10}
             >
               Resgatar Corte Fidelidade
+            </button>
+            <button 
+              onClick={handleHistoricoCortes}
+              className="px-6 py-3 bg-amber-950 text-white rounded-lg font-medium hover:bg-amber-900 transition-colors"
+            >
+              Histórico de Cortes
             </button>
           </div>
         </div>
@@ -232,6 +273,64 @@ export default function FidelidadePage() {
               <button
                 onClick={() => setShowQRModal(false)}
                 className="w-full bg-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-400 transition-colors"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Histórico de Cortes */}
+      {showHistoricoModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6">
+            <div className="text-center">
+              <h3 className="text-xl font-bold text-gray-800 mb-4">
+                Histórico de Cortes
+              </h3>
+              
+              <div className="mb-4">
+                <p className="text-gray-600 mb-2">
+                  <strong>Cliente:</strong> {session?.user?.userName || session?.user?.name}
+                </p>
+              </div>
+              
+              {/* Lista de datas com scroll */}
+              <div className="max-h-80 overflow-y-auto border border-gray-200 rounded-lg p-4">
+                {session?.user?.userDatas && session.user.userDatas.length > 0 ? (
+                  <div className="space-y-2">
+                    {session.user.userDatas
+                      .sort((a: string, b: string) => new Date(b).getTime() - new Date(a).getTime()) // Ordenar do mais recente para o mais antigo
+                      .map((data: string, index: number) => (
+                        <div key={index} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                          <p className="text-gray-800 font-medium">
+                            {new Date(data).toLocaleDateString('pt-BR', {
+                              weekday: 'long',
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })}
+                          </p>
+                          <p className="text-gray-500 text-sm">
+                            {new Date(data).toLocaleTimeString('pt-BR', {
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
+                        </div>
+                      ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">Nenhum corte registrado ainda.</p>
+                  </div>
+                )}
+              </div>
+              
+              <button
+                onClick={() => setShowHistoricoModal(false)}
+                className="w-full mt-4 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-400 transition-colors"
               >
                 Fechar
               </button>
