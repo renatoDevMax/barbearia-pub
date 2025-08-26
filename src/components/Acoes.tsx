@@ -219,6 +219,90 @@ export default function Acoes() {
                 <span className="font-semibold text-lg">Nossas Barbearias</span>
               </button>
             </div>
+
+            {/* Card Preço do Corte */}
+            <div className="mt-10 flex justify-center px-4">
+              <div className="w-full max-w-md bg-gradient-to-br from-gray-900 via-black to-gray-800 rounded-2xl border border-gray-700 shadow-[0_20px_40px_rgba(255,255,255,0.1)] hover:shadow-[0_25px_50px_rgba(255,255,255,0.2)] transition-all duration-500 hover:scale-105 overflow-hidden">
+                <div className="p-8 relative pb-15">
+                  {/* Texto do card */}
+                  <div className="mb-6">
+                    <h3 className="text-xl font-bold text-white mb-3 leading-relaxed">
+                      Corte de Cabelo
+                    </h3>
+                    <p className="text-gray-300 text-sm leading-relaxed">
+                      Oferecemos um serviço de qualidade com preço acessível. 
+                      Nossos profissionais são experientes e garantem um resultado 
+                      que supera suas expectativas.
+                    </p>
+                  </div>
+                  
+                  {/* Preço destacado */}
+                  <div className="absolute bottom-6 right-6">
+                    <div className="text-right">
+                      <div className="text-xs text-gray-400 mb-1 font-medium tracking-wider">
+                        APENAS
+                      </div>
+                      <div className="text-4xl font-bold text-white leading-none">
+                        R$ 45
+                      </div>
+                      <div className="text-xs text-gray-400 font-medium tracking-wider">
+                        ,00
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className='absolute bottom-6 left-6'>
+                    <p className='text-sm text-gray-400' >20 min - 40 min</p>
+                  </div>
+                  
+                  {/* Elemento decorativo */}
+                  <div className="absolute top-4 right-4 w-16 h-16 border border-gray-600 rounded-full opacity-20"></div>
+                  <div className="absolute bottom-4 left-4 w-8 h-8 border border-gray-600 rounded-full opacity-30"></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Card Preço do Corte + Barba */}
+            <div className="mt-6 flex justify-center px-4">
+              <div className="w-full max-w-md bg-gradient-to-br from-gray-900 via-black to-gray-800 rounded-2xl border border-gray-700 shadow-[0_20px_40px_rgba(255,255,255,0.1)] hover:shadow-[0_25px_50px_rgba(255,255,255,0.2)] transition-all duration-500 hover:scale-105 overflow-hidden">
+                <div className="p-8 relative pb-15">
+                  {/* Texto do card */}
+                  <div className="mb-6">
+                    <h3 className="text-xl font-bold text-white mb-3 leading-relaxed">
+                      Corte de Cabelo + Barba
+                    </h3>
+                    <p className="text-gray-300 text-sm leading-relaxed">
+                      Combo completo com o melhor custo-benefício. 
+                      Nossos profissionais são experientes e garantem um resultado 
+                      que supera suas expectativas.
+                    </p>
+                  </div>
+                  
+                  {/* Preço destacado */}
+                  <div className="absolute bottom-6 right-6">
+                    <div className="text-right">
+                      <div className="text-xs text-gray-400 mb-1 font-medium tracking-wider">
+                        APENAS
+                      </div>
+                      <div className="text-4xl font-bold text-white leading-none">
+                        R$ 65
+                      </div>
+                      <div className="text-xs text-gray-400 font-medium tracking-wider">
+                        ,00
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className='absolute bottom-6 left-6'>
+                    <p className='text-sm text-gray-400' >20 min - 40 min</p>
+                  </div>
+                  
+                  {/* Elemento decorativo */}
+                  <div className="absolute top-4 right-4 w-16 h-16 border border-gray-600 rounded-full opacity-20"></div>
+                  <div className="absolute bottom-4 left-4 w-8 h-8 border border-gray-600 rounded-full opacity-30"></div>
+                </div>
+              </div>
+            </div>
         </div>
 
         {/* Modal WiFi */}
