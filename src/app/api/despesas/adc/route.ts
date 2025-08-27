@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validação da recorrência
-    const recorrenciasValidas = ['individual', 'periodico'];
+    const recorrenciasValidas = ['individual', 'periodica'];
     if (!recorrenciasValidas.includes(recorrencia)) {
       return NextResponse.json({ 
         error: 'Recorrência deve ser: individual ou periodico' 
