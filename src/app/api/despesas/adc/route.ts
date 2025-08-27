@@ -29,10 +29,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Validação da recorrência
-    const recorrenciasValidas = ['única', 'mensal', 'semanal', 'diária'];
+    const recorrenciasValidas = ['individual', 'periodico'];
     if (!recorrenciasValidas.includes(recorrencia)) {
       return NextResponse.json({ 
-        error: 'Recorrência deve ser: única, mensal, semanal ou diária' 
+        error: 'Recorrência deve ser: individual ou periodico' 
       }, { status: 400, headers: corsHeaders });
     }
 

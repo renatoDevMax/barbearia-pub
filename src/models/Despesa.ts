@@ -13,8 +13,8 @@ const DespesaSchema = new mongoose.Schema({
   recorrencia: {
     type: String,
     required: [true, 'Recorrência é obrigatória'],
-    enum: ['única', 'mensal', 'semanal', 'diária'],
-    default: 'única'
+    enum: ['individual', 'periodico'],
+    default: 'individual'
   },
   data: {
     type: Date,
