@@ -27,6 +27,11 @@ const CorteSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Barbeiro é obrigatório'],
   },
+  service: {
+    type: String,
+    required: [true, 'Serviço é obrigatório'],
+    enum: ['cabelo', 'cabelo e barba'],
+  },
   userId: {
     type: String,
     required: [true, 'ID do usuário é obrigatório'],

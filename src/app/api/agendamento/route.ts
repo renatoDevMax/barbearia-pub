@@ -12,9 +12,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    const { data, horario, barbeiro } = await request.json();
+    const { data, horario, barbeiro, service } = await request.json();
     
-    if (!data || !horario || !barbeiro) {
+    if (!data || !horario || !barbeiro || !service) {
       return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 });
     }
 
@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
       data: new Date(data),
       horario: horario,
       barbeiro: barbeiro,
+      service: service,
       userId: user._id.toString(),
     });
 

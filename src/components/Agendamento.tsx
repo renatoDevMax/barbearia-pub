@@ -11,17 +11,35 @@ import ConfirmacaoModal from './ConfirmacaoModal';
 export default function Agendamento() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showTimeSelection, setShowTimeSelection] = useState(false);
+  const [showServiceSelection, setShowServiceSelection] = useState(false);
   const [showBarberSelection, setShowBarberSelection] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showConfirmacaoModal, setShowConfirmacaoModal] = useState(false);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedBarber, setSelectedBarber] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [agendamentosAtivos, setAgendamentosAtivos] = useState<any[]>([]);
 
   const { data: session } = useSession();
+
+  // Serviços disponíveis
+  const servicos = [
+    {
+      nome: 'cabelo',
+      descricao: 'Corte de Cabelo',
+      preco: 'R$ 45,00',
+      imagem: 'cabelo.png'
+    },
+    {
+      nome: 'cabelo e barba',
+      descricao: 'Corte de Cabelo + Barba',
+      preco: 'R$ 65,00',
+      imagem: 'cabelobarba.png'
+    }
+  ];
 
   // Carregar agendamentos ativos ao montar o componente
   useEffect(() => {
@@ -99,11 +117,19 @@ export default function Agendamento() {
     setSelectedTime(time);
   };
 
+  const handleServiceSelect = (serviceName: string) => {
+    setSelectedService(serviceName);
+  };
+
   const handleBarberSelect = (barberName: string) => {
     setSelectedBarber(barberName);
   };
 
   const handleTimeAdvance = () => {
+    setShowServiceSelection(true);
+  };
+
+  const handleServiceAdvance = () => {
     setShowBarberSelection(true);
   };
 
@@ -129,8 +155,18 @@ export default function Agendamento() {
     });
   };
 
+  // Função para capitalizar o texto do serviço
+  const capitalizarServico = (servico: string) => {
+    if (servico === 'cabelo') {
+      return 'Cabelo';
+    } else if (servico === 'cabelo e barba') {
+      return 'Cabelo e Barba';
+    }
+    return servico;
+  };
+
   const handleConfirmarAgendamento = async () => {
-    if (!selectedDate || !selectedTime || !selectedBarber) {
+    if (!selectedDate || !selectedTime || !selectedService || !selectedBarber) {
       alert('Dados incompletos para agendamento');
       return;
     }
@@ -152,6 +188,7 @@ export default function Agendamento() {
         body: JSON.stringify({
           data: selectedDate.toISOString(),
           horario: selectedTime,
+          service: selectedService,
           barbeiro: selectedBarber,
         }),
       });
@@ -245,7 +282,7 @@ export default function Agendamento() {
 
              {/* Seção de Seleção de Horário */}
        <div className={`absolute inset-0 bg-black text-white flex items-center justify-center py-16 transition-transform duration-500 ease-in-out ${
-         showTimeSelection && !showBarberSelection ? 'translate-x-0' : showTimeSelection && showBarberSelection ? '-translate-x-full' : 'translate-x-full'
+         showTimeSelection && !showServiceSelection ? 'translate-x-0' : showTimeSelection && showServiceSelection ? '-translate-x-full' : 'translate-x-full'
        }`}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Título */}
@@ -315,6 +352,80 @@ export default function Agendamento() {
         </div>
       </div>
 
+             {/* Seção de Seleção de Serviço */}
+       <div className={`absolute inset-0 bg-black text-white flex items-center justify-center py-16 transition-transform duration-500 ease-in-out ${
+         showServiceSelection && !showBarberSelection ? 'translate-x-0' : showServiceSelection && showBarberSelection ? '-translate-x-full' : 'translate-x-full'
+       }`}>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Título */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
+              Escolha o Serviço
+            </h1>
+            <p className="text-xl text-gray-300">
+              Selecione o serviço para seu agendamento
+            </p>
+          </div>
+
+          {/* Lista de Serviços */}
+          <div className="flex justify-center">
+            <div className="bg-gray-900 p-6 rounded-2xl shadow-2xl border border-gray-800 w-[calc(100%-40px)] max-w-md">
+                             {/* Botão Voltar */}
+               <div className="flex justify-center mb-4">
+                 <button 
+                   onClick={() => setShowServiceSelection(false)}
+                   className="text-gray-400 hover:text-white transition-colors text-sm"
+                 >
+                   ← Voltar para horário
+                 </button>
+               </div>
+
+              {/* Lista de Serviços */}
+              <div className="space-y-3">
+                {servicos.map((servico, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleServiceSelect(servico.nome)}
+                    className={`w-full p-4 rounded-lg text-lg font-medium transition-all duration-300 flex items-center space-x-4 ${
+                      selectedService === servico.nome
+                        ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg'
+                        : 'bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white'
+                    }`}
+                  >
+                    <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+                      <Image
+                        src={`/${servico.imagem}`}
+                        alt={servico.nome}
+                        width={48}
+                        height={48}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-white font-semibold">{capitalizarServico(servico.nome)}</p>
+                      <p className="text-gray-400 text-sm">{servico.descricao}</p>
+                      <p className="text-gray-400 text-sm">Preço: {servico.preco}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+                             {/* Botão Avançar */}
+               {selectedService && (
+                 <div className="text-center mt-6">
+                   <button 
+                     onClick={handleServiceAdvance}
+                     className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                   >
+                     Avançar
+                   </button>
+                 </div>
+               )}
+            </div>
+          </div>
+        </div>
+      </div>
+
              {/* Seção de Seleção de Barbeiro */}
        <div className={`absolute inset-0 bg-black text-white flex items-center justify-center py-16 transition-transform duration-500 ease-in-out ${
          showBarberSelection && !showConfirmation ? 'translate-x-0' : showBarberSelection && showConfirmation ? '-translate-x-full' : 'translate-x-full'
@@ -339,7 +450,7 @@ export default function Agendamento() {
                   onClick={() => setShowBarberSelection(false)}
                   className="text-gray-400 hover:text-white transition-colors text-sm"
                 >
-                  ← Voltar para horário
+                  ← Voltar para serviço
                 </button>
               </div>
 
@@ -385,13 +496,13 @@ export default function Agendamento() {
                  </div>
        </div>
 
-                                                               {/* Seção de Confirmação Final */}
-          <div className={`absolute inset-0 bg-black text-white flex items-center justify-center py-2 transition-transform duration-500 ease-in-out ${
-            showConfirmation && showBarberSelection ? 'translate-x-0' : 'translate-x-full'
+                                                                                                                               {/* Seção de Confirmação Final */}
+          <div className={`absolute inset-0 bg-black text-white overflow-y-auto transition-transform duration-500 ease-in-out ${
+            showConfirmation ? 'translate-x-0' : 'translate-x-full'
           }`}>
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                                                                                               {/* Título */}
-              <div className="text-center mb-4">
+                     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+                                                                                                {/* Título */}
+               <div className="text-center mb-4">
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
                   Confirmar Agendamento
                 </h1>
@@ -454,6 +565,17 @@ export default function Agendamento() {
                    <p className="text-white font-semibold">{selectedTime}</p>
                  </div>
 
+                                   {/* Serviço */}
+                  <div className="p-3 bg-gray-800 rounded-lg">
+                   <p className="text-gray-400 text-sm">Serviço</p>
+                   <p className="text-white font-semibold">
+                     {selectedService === 'cabelo' ? 'Corte de Cabelo' : 'Corte de Cabelo + Barba'}
+                   </p>
+                   <p className="text-blue-400 font-semibold">
+                     {selectedService === 'cabelo' ? 'R$ 45,00' : 'R$ 65,00'}
+                   </p>
+                 </div>
+
                                    {/* Barbeiro */}
                   <div className="p-3 bg-gray-800 rounded-lg">
                    <p className="text-gray-400 text-sm">Barbeiro</p>
@@ -461,16 +583,16 @@ export default function Agendamento() {
                  </div>
                </div>
 
-                                                                                                                               {/* Botão Confirmar */}
-                                     <div className="text-center mt-4 mb-4">
-                    <button 
-                      onClick={handleConfirmarAgendamento}
-                      disabled={isSubmitting}
-                      className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isSubmitting ? 'Confirmando...' : 'Confirmar Agendamento'}
-                    </button>
-                  </div>
+                                                                                                                                                                                                                                                               {/* Botão Confirmar */}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               <div className="text-center mt-16 mb-8">
+                          <button 
+                            onClick={handleConfirmarAgendamento}
+                            disabled={isSubmitting}
+                            className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {isSubmitting ? 'Confirmando...' : 'Confirmar Agendamento'}
+                          </button>
+                        </div>
              </div>
            </div>
          </div>
