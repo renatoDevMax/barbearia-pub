@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
 import dbConnect from '@/lib/mongodb';
 import Despesa from '@/models/Despesa';
 
@@ -12,11 +11,6 @@ const corsHeaders = {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession();
-    
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401, headers: corsHeaders });
-    }
 
     const { nome, valor, recorrencia, data } = await request.json();
     
