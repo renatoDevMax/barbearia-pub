@@ -3,12 +3,19 @@ import { getServerSession } from 'next-auth';
 import dbConnect from '@/lib/mongodb';
 import Despesa from '@/models/Despesa';
 
+// Configuração CORS
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession();
     
     if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401, headers: corsHeaders });
     }
 
     const { nome, valor, recorrencia, data } = await request.json();
@@ -17,14 +24,14 @@ export async function POST(request: NextRequest) {
     if (!nome || valor === undefined || !recorrencia) {
       return NextResponse.json({ 
         error: 'Dados incompletos. Nome, valor e recorrência são obrigatórios' 
-      }, { status: 400 });
+      }, { status: 400, headers: corsHeaders });
     }
 
     // Validação do valor
     if (typeof valor !== 'number' || valor < 0) {
       return NextResponse.json({ 
         error: 'Valor deve ser um número positivo' 
-      }, { status: 400 });
+      }, { status: 400, headers: corsHeaders });
     }
 
     // Validação da recorrência
@@ -32,7 +39,7 @@ export async function POST(request: NextRequest) {
     if (!recorrenciasValidas.includes(recorrencia)) {
       return NextResponse.json({ 
         error: 'Recorrência deve ser: única, mensal, semanal ou diária' 
-      }, { status: 400 });
+      }, { status: 400, headers: corsHeaders });
     }
 
     await dbConnect();
@@ -51,12 +58,20 @@ export async function POST(request: NextRequest) {
       success: true, 
       message: 'Despesa adicionada com sucesso',
       data: novaDespesa 
-    }, { status: 201 });
+    }, { status: 201, headers: corsHeaders });
 
   } catch (error) {
     console.error('Erro ao adicionar despesa:', error);
     return NextResponse.json({ 
       error: 'Erro interno do servidor' 
-    }, { status: 500 });
+    }, { status: 500, headers: corsHeaders });
   }
+}
+
+// Handler para requisições OPTIONS (preflight)
+export async function OPTIONS(request: NextRequest) {
+  return new NextResponse(null, {
+    status: 200,
+    headers: corsHeaders,
+  });
 }
