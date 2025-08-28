@@ -532,7 +532,7 @@ export default function Agendamento() {
               </div>
 
                              {/* Botão Avançar */}
-               {selectedBarber && getBarbeirosDisponiveis(selectedDate, selectedTime).some(b => b.nome === selectedBarber) && (
+               {selectedBarber && selectedDate && selectedTime && getBarbeirosDisponiveis(selectedDate, selectedTime).some(b => b.nome === selectedBarber) && (
                  <div className="text-center mt-6">
                    <button 
                      onClick={handleBarberAdvance}
