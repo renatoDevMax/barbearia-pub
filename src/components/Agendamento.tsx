@@ -146,13 +146,32 @@ export default function Agendamento() {
     setShowConfirmation(true);
   };
 
-  // Função para verificar se um horário está ocupado
+  // Função para verificar se um horário está ocupado (todos os barbeiros)
   const isHorarioOcupado = (data: Date, horario: string) => {
     const dataFormatada = data.toISOString().split('T')[0];
-    return agendamentosAtivos.some(agendamento => {
+    const agendamentosNoHorario = agendamentosAtivos.filter(agendamento => {
       const agendamentoData = new Date(agendamento.data).toISOString().split('T')[0];
       return agendamentoData === dataFormatada && agendamento.horario === horario;
     });
+    
+    // Horário está ocupado se todos os 3 barbeiros estão comprometidos
+    return agendamentosNoHorario.length >= 3;
+  };
+
+  // Função para verificar se um barbeiro específico está ocupado
+  const isBarbeiroOcupado = (data: Date, horario: string, barbeiro: string) => {
+    const dataFormatada = data.toISOString().split('T')[0];
+    return agendamentosAtivos.some(agendamento => {
+      const agendamentoData = new Date(agendamento.data).toISOString().split('T')[0];
+      return agendamentoData === dataFormatada && 
+             agendamento.horario === horario && 
+             agendamento.barbeiro === barbeiro;
+    });
+  };
+
+  // Função para obter barbeiros disponíveis em um horário
+  const getBarbeirosDisponiveis = (data: Date, horario: string) => {
+    return barbeiros.filter(barbeiro => !isBarbeiroOcupado(data, horario, barbeiro.nome));
   };
 
   // Função para capitalizar o texto do serviço
@@ -456,32 +475,64 @@ export default function Agendamento() {
 
               {/* Lista de Barbeiros */}
               <div className="space-y-3">
-                {barbeiros.map((barbeiro, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleBarberSelect(barbeiro.nome)}
-                    className={`w-full p-4 rounded-lg text-lg font-medium transition-all duration-300 flex items-center space-x-4 ${
-                      selectedBarber === barbeiro.nome
-                        ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg'
-                        : 'bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white'
-                    }`}
-                  >
-                    <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
-                      <Image
-                        src={`/${barbeiro.imagem}`}
-                        alt={barbeiro.nome}
-                        width={48}
-                        height={48}
-                        className="w-full h-full object-cover"
-                      />
+                {selectedDate && selectedTime ? (
+                  getBarbeirosDisponiveis(selectedDate, selectedTime).length > 0 ? (
+                    getBarbeirosDisponiveis(selectedDate, selectedTime).map((barbeiro, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleBarberSelect(barbeiro.nome)}
+                        className={`w-full p-4 rounded-lg text-lg font-medium transition-all duration-300 flex items-center space-x-4 ${
+                          selectedBarber === barbeiro.nome
+                            ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg'
+                            : 'bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white'
+                        }`}
+                      >
+                        <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+                          <Image
+                            src={`/${barbeiro.imagem}`}
+                            alt={barbeiro.nome}
+                            width={48}
+                            height={48}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <span className="text-left">{barbeiro.nome}</span>
+                      </button>
+                    ))
+                  ) : (
+                    <div className="text-center p-4 bg-red-900 text-red-300 rounded-lg">
+                      <p>Nenhum barbeiro disponível neste horário</p>
+                      <p className="text-sm mt-2">Todos os profissionais estão ocupados</p>
                     </div>
-                    <span className="text-left">{barbeiro.nome}</span>
-                  </button>
-                ))}
+                  )
+                ) : (
+                  barbeiros.map((barbeiro, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleBarberSelect(barbeiro.nome)}
+                      className={`w-full p-4 rounded-lg text-lg font-medium transition-all duration-300 flex items-center space-x-4 ${
+                        selectedBarber === barbeiro.nome
+                          ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg'
+                          : 'bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white'
+                      }`}
+                    >
+                      <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+                        <Image
+                          src={`/${barbeiro.imagem}`}
+                          alt={barbeiro.nome}
+                          width={48}
+                          height={48}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <span className="text-left">{barbeiro.nome}</span>
+                    </button>
+                  ))
+                )}
               </div>
 
                              {/* Botão Avançar */}
-               {selectedBarber && (
+               {selectedBarber && getBarbeirosDisponiveis(selectedDate, selectedTime).some(b => b.nome === selectedBarber) && (
                  <div className="text-center mt-6">
                    <button 
                      onClick={handleBarberAdvance}
