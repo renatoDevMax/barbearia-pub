@@ -10,11 +10,29 @@ export async function POST(request: NextRequest) {
     const corteData = await request.json();
     
     // Verificar campos obrigatórios
-    if (!corteData.nome || !corteData.telefone || !corteData.barbeiro || !corteData.userId) {
+    if (!corteData.nome || !corteData.telefone || !corteData.barbeiro || !corteData.userId || !corteData.service) {
       const errorResponse = NextResponse.json(
         { 
           success: false, 
-          error: 'Campos obrigatórios: nome, telefone, barbeiro, userId' 
+          error: 'Campos obrigatórios: nome, telefone, barbeiro, userId, service' 
+        },
+        { status: 400 }
+      );
+      
+      errorResponse.headers.set('Access-Control-Allow-Origin', '*');
+      errorResponse.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+      errorResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      
+      return errorResponse;
+    }
+
+    // Validar se o service é válido
+    const servicesValidos = ['cabelo', 'cabelo e barba'];
+    if (!servicesValidos.includes(corteData.service)) {
+      const errorResponse = NextResponse.json(
+        { 
+          success: false, 
+          error: 'Service deve ser: cabelo ou cabelo e barba' 
         },
         { status: 400 }
       );
@@ -43,6 +61,7 @@ export async function POST(request: NextRequest) {
       data: data,
       horario: horario,
       barbeiro: corteData.barbeiro,
+      service: corteData.service,
       userId: corteData.userId
     };
     
