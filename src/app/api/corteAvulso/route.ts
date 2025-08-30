@@ -10,10 +10,14 @@ const corsHeaders = {
 
 export async function POST(request: NextRequest) {
   try {
-    const { nome, telefone, status, data, horario, barbeiro, service, userId } = await request.json();
+    const body = await request.json();
+    console.log('Dados recebidos:', body);
+    
+    const { nome, telefone, status, data, horario, barbeiro, service, userId } = body;
 
     // Validações obrigatórias
     if (!nome || !telefone || !status || !data || !horario || !barbeiro || !service) {
+      console.log('Dados faltando:', { nome: !!nome, telefone: !!telefone, status: !!status, data: !!data, horario: !!horario, barbeiro: !!barbeiro, service: !!service });
       return NextResponse.json({ 
         error: 'Dados incompletos. Nome, telefone, status, data, horário, barbeiro e service são obrigatórios' 
       }, { status: 400, headers: corsHeaders });
@@ -22,36 +26,42 @@ export async function POST(request: NextRequest) {
     // Validar se o service é válido
     const servicesValidos = ['cabelo', 'cabelo e barba'];
     if (!servicesValidos.includes(service)) {
+      console.log('Service inválido:', service);
       return NextResponse.json({ 
         error: 'Service deve ser: cabelo ou cabelo e barba' 
       }, { status: 400, headers: corsHeaders });
     }
 
     // Validar se o status é válido
-    const statusValidos = ['aberto', 'fechado', 'cancelado'];
+    const statusValidos = ['agendado', 'confirmado', 'cancelado', 'realizado', 'fechado'];
     if (!statusValidos.includes(status)) {
+      console.log('Status inválido:', status);
       return NextResponse.json({ 
-        error: 'Status deve ser: aberto, fechado ou cancelado' 
-      }, { status: 400, headers: corsHeaders });
-    }
-
-    // Validar se o barbeiro é válido
-    const barbeirosValidos = ['José Antonio', 'Gustavo Souza', 'André Silva'];
-    if (!barbeirosValidos.includes(barbeiro)) {
-      return NextResponse.json({ 
-        error: 'Barbeiro deve ser: José Antonio, Gustavo Souza ou André Silva' 
+        error: 'Status deve ser: agendado, confirmado, cancelado, realizado ou fechado' 
       }, { status: 400, headers: corsHeaders });
     }
 
     // Conectar ao banco
     await dbConnect();
 
+    // Tratar a data
+    let dataFormatada;
+    if (typeof data === 'string') {
+      dataFormatada = new Date(data);
+    } else if (data && data.$date) {
+      dataFormatada = new Date(data.$date);
+    } else {
+      dataFormatada = new Date(data);
+    }
+
+    console.log('Data formatada:', dataFormatada);
+
     // Criar o objeto de corte avulso
     const corteAvulso = await Corte.create({
       nome,
       telefone,
       status,
-      data: new Date(data),
+      data: dataFormatada,
       horario,
       barbeiro,
       service,

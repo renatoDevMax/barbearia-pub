@@ -12,7 +12,7 @@ const CorteSchema = new mongoose.Schema({
   status: {
     type: String,
     required: [true, 'Status é obrigatório'],
-    enum: ['agendado', 'confirmado', 'cancelado', 'realizado'],
+    enum: ['agendado', 'confirmado', 'cancelado', 'realizado', 'fechado'],
     default: 'agendado'
   },
   data: {
